@@ -1,0 +1,28 @@
+# Arduino / ESP32 build artifacts
+*.hex
+*.eep
+*.elf
+*.map
+*.bin
+*.lst
+build/
+*.ino.cpp
+
+# Wokwi
+.wokwi/
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
+ehthumbs.db
+
+# Logs
+*.log
