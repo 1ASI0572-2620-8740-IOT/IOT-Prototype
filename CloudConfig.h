@@ -14,6 +14,7 @@
 
 // ---------- Endpoints ----------
 #define CLOUD_HEALTH_ENDPOINT "/health"
+#define CLOUD_DEVICE_AUTH_ENDPOINT "/edge/v1/device-auth/session"
 
 // ---------- CA root ----------
 // No se usa: TLS en modo insecure (setInsecure), como en el ejemplo basico de Wokwi.

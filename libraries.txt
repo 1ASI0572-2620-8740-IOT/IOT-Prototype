@@ -5,3 +5,4 @@ OneWire
 LiquidCrystal I2C
 DallasTemperature
 ESP32Servo
+ArduinoJson

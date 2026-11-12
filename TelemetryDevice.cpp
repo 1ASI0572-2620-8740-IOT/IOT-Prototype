@@ -19,8 +19,14 @@ void TelemetryDevice::begin() {
     servo.begin();
     cloud.begin();
     Serial.println("[TelemetryDevice] Iniciando health check...");
-    bool ok = cloud.health(); // Primera llamada: GET /health
+    bool ok = cloud.health(); // GET /health
     Serial.printf("[TelemetryDevice] Health check: %s\n", ok ? "OK" : "FALLO");
+
+    Serial.println("[TelemetryDevice] Solicitando device-auth session...");
+    String devId, orgId;
+    bool authOk = cloud.deviceAuthSession(devId, orgId);
+    Serial.printf("[TelemetryDevice] Device auth: %s (device=%s, org=%s)\n",
+                  authOk ? "OK" : "FALLO", devId.c_str(), orgId.c_str());
     evaluateRanges(); // Estado inicial (fuera de rango -> rojo + cierre)
 }
 

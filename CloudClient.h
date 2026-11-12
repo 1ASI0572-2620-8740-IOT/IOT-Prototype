@@ -12,6 +12,7 @@ class CloudClient {
 public:
     bool begin();        ///< Configura TLS (WiFi debe estar conectado).
     bool health();       ///< GET /health al backend.
+    bool deviceAuthSession(String& outDeviceId, String& outOrgId); ///< GET device-auth/session con Basic auth.
 
 private:
     WiFiClientSecure secureClient;
