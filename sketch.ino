@@ -4,11 +4,26 @@
  */
 #include "ModestIoT.h"
 #include "TelemetryDevice.h"
+#include "CloudConfig.h"
+#include <WiFi.h>
 
 TelemetryDevice device;
 
 void setup() {
     Serial.begin(115200);
+
+    // Conexion WiFi
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD, 6);
+    Serial.print("Conectando a WiFi");
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println();
+    Serial.print("WiFi conectado, IP: ");
+    Serial.println(WiFi.localIP());
+    Serial.println("Iniciando dispositivo...");
+
     device.begin();
 
     // Mensaje de bienvenida

@@ -7,6 +7,7 @@
 #include "LcdDisplay.h"
 #include "Led.h"
 #include "ServoActuator.h"
+#include "CloudClient.h"
 
 /**
  * @brief Dispositivo de telemetría: lee pH y temperatura, muestra en LCD y Serial.
@@ -20,6 +21,7 @@ private:
     Led greenLed;
     Led redLed;
     ServoActuator servo;
+    CloudClient cloud;
     float phVal;
     float tempVal;
     bool lastOk;

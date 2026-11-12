@@ -17,6 +17,10 @@ void TelemetryDevice::begin() {
     tempSensor.begin();
     lcd.begin();
     servo.begin();
+    cloud.begin();
+    Serial.println("[TelemetryDevice] Iniciando health check...");
+    bool ok = cloud.health(); // Primera llamada: GET /health
+    Serial.printf("[TelemetryDevice] Health check: %s\n", ok ? "OK" : "FALLO");
     evaluateRanges(); // Estado inicial (fuera de rango -> rojo + cierre)
 }
 
