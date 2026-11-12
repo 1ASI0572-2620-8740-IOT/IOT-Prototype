@@ -13,6 +13,7 @@ public:
     bool begin();        ///< Configura TLS (WiFi debe estar conectado).
     bool health();       ///< GET /health al backend.
     bool deviceAuthSession(String& outDeviceId, String& outOrgId); ///< GET device-auth/session con Basic auth.
+    bool sendTelemetry(float ph, float temp, const String& measurementId, const String& measuredAt); ///< POST telemetria.
 
 private:
     WiFiClientSecure secureClient;

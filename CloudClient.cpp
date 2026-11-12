@@ -94,3 +94,36 @@ bool CloudClient::deviceAuthSession(String& outDeviceId, String& outOrgId) {
     http.end();
     return ok && code >= 200 && code < 300;
 }
+
+bool CloudClient::sendTelemetry(float ph, float temp, const String& measurementId, const String& measuredAt) {
+    if (WiFi.status() != WL_CONNECTED) {
+        Serial.println("[Cloud] WiFi no conectado");
+        return false;
+    }
+
+    String creds = String(CLOUD_DEVICE_ID) + ":" + String(CLOUD_CREDENTIAL);
+    String b64 = base64Encode(creds);
+
+    String body = "{\"measurementId\":\"" + measurementId +
+                  "\",\"ph\":" + String(ph, 2) +
+                  ",\"temperature\":" + String(temp, 2) +
+                  ",\"measuredAt\":\"" + measuredAt + "\"}";
+
+    HTTPClient http;
+    String url = String(CLOUD_BASE_URL) + CLOUD_TELEMETRY_ENDPOINT;
+    http.begin(secureClient, url);
+    http.useHTTP10(true);
+    http.setTimeout(15000);
+    http.addHeader("Authorization", "Basic " + b64);
+    http.addHeader("Content-Type", "application/json");
+
+    int code = http.POST(body);
+    Serial.printf("[Cloud] POST %s -> HTTP %d\n", CLOUD_TELEMETRY_ENDPOINT, code);
+    if (code > 0) {
+        Serial.println(http.getString());
+    } else {
+        Serial.printf("[Cloud] Error: %s\n", http.errorToString(code).c_str());
+    }
+    http.end();
+    return code >= 200 && code < 300;
+}

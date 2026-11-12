@@ -8,6 +8,7 @@
 #include "Led.h"
 #include "ServoActuator.h"
 #include "CloudClient.h"
+#include <esp_system.h>
 
 /**
  * @brief Dispositivo de telemetría: lee pH y temperatura, muestra en LCD y Serial.
@@ -26,6 +27,8 @@ private:
     float tempVal;
     bool lastOk;
     bool hasLastOk;
+    char bootId[24];
+    uint32_t telemetryCounter;
 
 public:
     static const int PH_PIN = 34;          ///< Pin analógico del potenciómetro (pH).
@@ -45,6 +48,8 @@ public:
     void triggerTempReadEvent(); ///< Dispara la lectura de temperatura.
 
     void evaluateRanges(); ///< Evalúa rangos y actualiza LEDs.
+
+    String getMeasuredAt(); ///< Timestamp ISO 8601 UTC.
 
     float getPh() const;
     float getTemp() const;

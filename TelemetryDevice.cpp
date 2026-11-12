@@ -1,5 +1,6 @@
 #include "TelemetryDevice.h"
 #include <Arduino.h>
+#include <time.h>
 
 TelemetryDevice::TelemetryDevice()
     : phSensor(PH_PIN, this),
@@ -11,13 +12,32 @@ TelemetryDevice::TelemetryDevice()
       phVal(0.0f),
       tempVal(0.0f),
       lastOk(false),
-      hasLastOk(false) {}
+      hasLastOk(false),
+      telemetryCounter(0) {
+    bootId[0] = '\0';
+}
 
 void TelemetryDevice::begin() {
     tempSensor.begin();
     lcd.begin();
     servo.begin();
     cloud.begin();
+
+    // bootId unico para esta ejecucion
+    snprintf(bootId, sizeof(bootId), "%08lx%08lx",
+             (unsigned long)esp_random(), (unsigned long)esp_random());
+    telemetryCounter = 0;
+    Serial.printf("[TelemetryDevice] bootId=%s\n", bootId);
+
+    // Sincronizar reloj por NTP para measuredAt
+    configTime(0, 0, "pool.ntp.org");
+    time_t now = 0;
+    for (int i = 0; i < 20 && now < 1000000000; i++) {
+        delay(500);
+        time(&now);
+    }
+    Serial.printf("[TelemetryDevice] NTP: %s\n", now >= 1000000000 ? "OK" : "NO SYNC");
+
     Serial.println("[TelemetryDevice] Iniciando health check...");
     bool ok = cloud.health(); // GET /health
     Serial.printf("[TelemetryDevice] Health check: %s\n", ok ? "OK" : "FALLO");
@@ -27,7 +47,21 @@ void TelemetryDevice::begin() {
     bool authOk = cloud.deviceAuthSession(devId, orgId);
     Serial.printf("[TelemetryDevice] Device auth: %s (device=%s, org=%s)\n",
                   authOk ? "OK" : "FALLO", devId.c_str(), orgId.c_str());
+
     evaluateRanges(); // Estado inicial (fuera de rango -> rojo + cierre)
+}
+
+String TelemetryDevice::getMeasuredAt() {
+    time_t now;
+    time(&now);
+    struct tm* t = gmtime(&now);
+    char buf[32];
+    if (t) {
+        strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", t);
+    } else {
+        snprintf(buf, sizeof(buf), "1970-01-01T00:00:00Z");
+    }
+    return String(buf);
 }
 
 void TelemetryDevice::on(Event event) {
@@ -49,6 +83,14 @@ void TelemetryDevice::on(Event event) {
         Serial.print("Temp Medida: ");
         Serial.print(tempVal, 2);
         Serial.println(" C");
+
+        // Enviar telemetria periodica
+        telemetryCounter++;
+        String measurementId = String(bootId) + "-" + String(telemetryCounter);
+        String measuredAt = getMeasuredAt();
+        Serial.printf("[Telemetry] measurementId=%s measuredAt=%s\n",
+                      measurementId.c_str(), measuredAt.c_str());
+        cloud.sendTelemetry(phVal, tempVal, measurementId, measuredAt);
 
         evaluateRanges();
     }
